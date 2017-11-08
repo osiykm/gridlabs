@@ -146,6 +146,57 @@ def lab3_task(out_file_name):
                   voltage_nodes[i]))
 
 ###
+### Решение задачи второй третьей лабораторной работы.
+### Изменяя  сопротивление  контура,  подобрать  такое  его  значение,  
+### начиная  с  которого колебания прекращаются через заданное время 
+### (построить графики).
+###
+def lab3_second_task(out_file_name):
+    time_nodes = drange(t_start, t_end, t_step) 
+    resist_arr = drange(10, Rcrit, 10)
+
+    for res in resist_arr:
+        # 2 * beta == R / L
+        equation_system = [                                      \
+            lambda t, q: q[1],                                   \
+            lambda t, q: - (res / L) * q[1] - (w0 ** 2.0) * q[0] \
+        ]
+        
+        result = solve_equation_system(equation_system, time_nodes, [2E-4, 0])
+        charge_nodes = result[0]
+        amperage_nodes = result[1]
+        voltage_nodes = [R * amperage_nodes[i] for i in range(0, len(amperage_nodes))]
+        print("%s %s %s" % (charge_nodes[-1], charge_nodes[-2], charge_nodes[-3]))
+
+        #выход, если значение не меняется
+        if math.fabs(charge_nodes[-1] - charge_nodes[-2]) < 1E-10 and \
+           math.fabs(charge_nodes[-2] - charge_nodes[-3]) < 1E-10:
+            break;
+
+    if is_filling_files_enabled:
+        file = open(out_file_name, "w")
+        file.seek(0)
+        file.truncate() 
+        file.write("RESISTSNCE: %s" % res)
+        for i in range(0, len(time_nodes)):
+            file.write("%s" % time_nodes[i])
+            file.write("\t%s" % charge_nodes[i])
+            file.write("\t%s" % amperage_nodes[i])
+            file.write("\t%s\n" % voltage_nodes[i])
+
+        file.close()
+
+    if is_console_output_enabled:
+        print("############### LAB 3 RESIST ##############")
+        print("RESISTANCE: ", res)
+        for i in range(0, len(time_nodes)):
+            print("%7s %24s %24s %24s" % ( \
+                  round(time_nodes[i], 6),          \
+                  charge_nodes[i],         \
+                  amperage_nodes[i],       \
+                  voltage_nodes[i]))
+            
+###
 ### Решение задачи четвертой лабораторной работы
 ###
 def lab4_task(out_file_name):
